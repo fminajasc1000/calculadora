@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="14c2f3e7-5ae0-4f08-b453-62237fa986f3" >
+		<http:listener-connection host="0.0.0.0" port="8089" />
+	</http:listener-config>
+	<flow name="calculadoraFlow" doc:id="ea003ba5-9752-440d-9b49-8750616d870a" >
+		<http:listener doc:name="Listener" doc:id="91875529-922d-4e7e-89fc-c55578aa2e7d" config-ref="HTTP_Listener_config" path="/operation"/>
+		<set-variable value="#[attributes.queryParams.num1!]" doc:name="Set Variable" doc:id="5e4c316e-9d31-4aa7-a94b-ef5d43b0d0c4" variableName="num1"/>
+		<set-variable value="#[attributes.queryParams.num2!]" doc:name="Set Variable" doc:id="d78f93a1-c7c4-4d60-be60-cf6bb347cd39" variableName="num2"/>
+		<set-variable value="#[attributes.queryParams.opera!]" doc:name="Set Variable" doc:id="6facd903-38a8-4378-baad-2e704d39903c" variableName="opera"/>
+		<choice doc:name="Choice" doc:id="45e3d3cc-c57b-4741-9201-8c74968170e9" >
+			<when expression='#[vars.opera=="addition"]'>
+				<set-payload value='#["The operation: "++(vars.num1 as String)++"+"++(vars.num2 as String)++"="++(vars.num1 as Number) + (vars.num2 as Number)]' doc:name="Set Payload" doc:id="daed2e91-7f3d-4348-8f8a-1eb441f6c515" />
+				<ee:transform doc:name="Transform Message" doc:id="9857f231-503c-4f87-a98e-e8cf57274c5e" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[vars.opera=="substraction"]'>
+				<set-payload value='#["The operation: "++(vars.num1 as String)++"-"++(vars.num2 as String)++"="++(vars.num1 as Number) - (vars.num2 as Number)]' doc:name="Set Payload" doc:id="ac9f03fa-449a-4b56-a064-6171757fb9d0" />
+				<ee:transform doc:name="Transform Message" doc:id="47267119-90fa-4ddd-8eef-73a4bdea27e8" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[vars.opera=="multiplication"]'>
+				<set-payload doc:name="Set Payload" doc:id="744b3001-256a-4445-8331-6f8eae49a32f" value='#["The operation: "++(vars.num1 as String)++"*"++(vars.num2 as String)++"="++(vars.num1 as Number) * (vars.num2 as Number)]'/>
+				<ee:transform doc:name="Transform Message" doc:id="53bc99e7-336c-4976-880a-cf12d9eff2c6" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='vars.opera=="division"'>
+				<set-payload doc:name="Set Payload" doc:id="46f77b13-2057-4198-b859-6849647b7125" value='#["The operation: "++(vars.num1 as String)++"/"++(vars.num2 as String)++"="++(vars.num1 as Number) / (vars.num2 as Number)]'/>
+				<ee:transform doc:name="Transform Message" doc:id="76a65c3c-cff6-49a0-bc45-c9dd0c7eb075" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<set-payload value="Try again" doc:name="Set Payload" doc:id="dfa18a1a-f02d-4ccd-ac12-36f73cca4ddd" />
+			</otherwise>
+		</choice>
+	</flow>
+</mule>
